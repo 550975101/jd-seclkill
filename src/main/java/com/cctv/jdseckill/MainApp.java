@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.concurrent.*;
 
 /**
@@ -38,13 +37,13 @@ public class MainApp {
         }
         coreService.getQrcodeTicket(configProperties);
         coreService.validateQrcodeTicket(configProperties);
-        coreService.getUserName(configProperties);
+        String userName = coreService.getUserName(configProperties);
 //        String seckillUrl = coreService.getSeckillUrl(configProperties);
 //        if (seckillUrl == null) {
 //            System.out.println(LocalDateTime.now()+" 秒杀链接获取失败");
 //            System.exit(0);
 //        }
-//        coreService.requestSeckillUrl(configProperties, seckillUrl);
+//        coreService.requestSeckillUrl(configProperties, seckillUrl,userName);
         String seckillInitInfo = coreService.getSeckillInitInfo(configProperties);
         Map<String, Object> seckillOrderData = coreService.getSeckillOrderData(configProperties, seckillInitInfo);
         Boolean flag = coreService.submitSeckillOrder(configProperties, seckillOrderData);

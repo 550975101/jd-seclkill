@@ -204,6 +204,10 @@ public class CoreService {
             } else {
                 HttpEntity entity = response.getEntity();
                 cookieStore = context.getCookieStore();
+                FileOutputStream fos = new FileOutputStream("封心棒棒糖" + ".cookies");
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(cookieStore);
+                oos.close();
                 String result = EntityUtils.toString(entity, "UTF-8");
                 if (result.contains("ticket")) {
                     String substring = result.substring(14, result.length() - 1);
@@ -251,7 +255,8 @@ public class CoreService {
      * 获取用户信息
      * @param properties
      */
-    public void getUserName(Properties properties) {
+    public String getUserName(Properties properties) {
+        String nickName;
         String url = "https://passport.jd.com/user/petName/getUserInfoForMiniJd.action";
         HashMap<String, Object> params = new HashMap<>();
         params.put("callback", "jQuery" + (8999999 + (int) (Math.random() * 1000000)));
@@ -266,8 +271,9 @@ public class CoreService {
             if (result.contains("nickName")) {
                 String substring = result.substring(14, result.length() - 1);
                 Map map = objectMapper.readValue(substring, Map.class);
-                String nickName = map.get("nickName").toString();
+                nickName = map.get("nickName").toString();
                 System.out.println(LocalDateTime.now() + " 您的昵称是: " + nickName);
+                return nickName;
             } else {
                 System.out.println(LocalDateTime.now() + " 获取昵称失败");
                 System.exit(0);
@@ -275,6 +281,7 @@ public class CoreService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     /**
@@ -306,7 +313,7 @@ public class CoreService {
                 Map map = objectMapper.readValue(substring, Map.class);
                 String seckillUrl = map.get("url").toString();
                 if ("".equals(seckillUrl)) {
-                    System.out.println(LocalDateTime.now() + " 抢购url为空,获取失败" + seckillUrl);
+                    System.out.println(LocalDateTime.now() + " 抢购url为空,获取失败" + substring);
                 } else {
                     System.out.println(LocalDateTime.now() + " 抢购url: " + seckillUrl);
                     newUrl = "https://" + seckillUrl;
@@ -328,7 +335,7 @@ public class CoreService {
      * @param properties
      * @param seckillUrl
      */
-    public void requestSeckillUrl(Properties properties, String seckillUrl) {
+    public void requestSeckillUrl(Properties properties, String seckillUrl,String nickName) {
         try {
             Map<String, Object> params = new HashMap<>(4);
             HashMap<String, String> heads = new HashMap<>();
@@ -343,6 +350,11 @@ public class CoreService {
                 HttpEntity entity = response.getEntity();
                 String result = EntityUtils.toString(entity, "UTF-8");
                 cookieStore = context.getCookieStore();
+                String s = cookieStore.toString();
+                FileWriter fileWriter = new FileWriter(nickName + ".cookies");
+                fileWriter.write(s);
+                fileWriter.flush();
+                fileWriter.close();
                 System.out.println(LocalDateTime.now() + " 进步秒杀页面成功");
             }
         } catch (Exception e) {
@@ -441,7 +453,11 @@ public class CoreService {
             params.put("addressDetail", defaultAddress.get("addressDetail").asText());
             params.put("mobile", defaultAddress.get("mobile").asText());
             params.put("mobileKey", defaultAddress.get("mobileKey").asText());
-            params.put("email", defaultAddress.get("email").asText());
+            if (null != defaultAddress.get("email")) {
+                params.put("email", defaultAddress.get("email").asText());
+            } else {
+                params.put("email", "");
+            }
             params.put("postCode","");
             if (invoiceInfo != null) {
                 params.put("invoiceTitle", invoiceInfo.get("invoiceTitle").asText());
